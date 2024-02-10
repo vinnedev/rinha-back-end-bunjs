@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  cockroachdb:
+    image: cockroachdb/cockroach:v23.2.0
+    command: start --advertise-addr=roach1:26357 --http-addr=roach1:8080 --listen-addr=roach1:26357 --sql-addr=roach1:26257 --insecure --join=roach1:26357,roach2:26357,roach3:26357
+    container_name: cockroachdb
+    hostname: cockroachdb
+    networks:
+      - roachnet
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - roach1:/cockroach/cockroach-data
+
+networks:
+  roachnet:
+
+volumes:
+  cockroachdb:
