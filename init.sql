@@ -3,7 +3,7 @@ CREATE TYPE enum_type AS ENUM('c', 'd');
 CREATE TABLE customers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    limit INT NOT NULL,
+    customer_limit INT NOT NULL,
     balance INT
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE transactions (
 
 DO $$
 BEGIN
-  INSERT INTO customer (name, limit)
+  INSERT INTO customers (name, customer_limit)
   VALUES
     ('Vinicius Abreu', 1000 * 100),
     ('zanfranceschi', 800 * 100),
