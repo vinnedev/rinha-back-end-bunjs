@@ -29,3 +29,20 @@ export interface IExtractReponse {
     }
   ];
 }
+
+// Database Tables
+export interface ICustomers {
+  id: number;
+  name: string;
+  customer_limit: number;
+  balance: number | null;
+}
+
+export interface ITransactions {
+  id: number;
+  customer_id: number;
+  value: number;
+  type: ETipo;
+  description: string;
+  created_at: Date;
+}

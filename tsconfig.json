@@ -4,7 +4,9 @@
     "module": "ES2022",
     "moduleResolution": "node",
     "types": [
-      "bun-types"
+      "bun-types",
+      "jest",
+      "node"
     ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

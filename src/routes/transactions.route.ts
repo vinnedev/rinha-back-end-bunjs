@@ -1,12 +1,17 @@
 import { Elysia } from "elysia";
 import * as yup from "yup";
 import { ETipo, ITransactions, ITransactionsResponse } from "../interfaces";
-import { ValidationException } from "../utils/errors";
+import { UserService } from "../services/user.service";
+import {
+  CustomerNotFoundException,
+  InconsistentTransactionException,
+  ValidationException,
+} from "../utils/errors";
 
 interface IReceiveRequest {
   body: ITransactions;
   params: {
-    id: number;
+    id: Record<"id", string>;
   };
   set: any;
 }
@@ -27,7 +32,11 @@ export const transactionsRouter = new Elysia()
             .required("[valor] is required")
             .integer("[valor] should be integer")
             .positive("[valor] should be positive"),
-          tipo: yup.mixed<ETipo>().oneOf(Object.values(ETipo)),
+          tipo: yup
+            .mixed<ETipo>()
+            .oneOf(Object.values(ETipo))
+            .required("[tipo] is required")
+            .nonNullable(),
           descricao: yup
             .string()
             .required("[descricao] is requred")
@@ -38,11 +47,23 @@ export const transactionsRouter = new Elysia()
         const data = await validationSchema
           .validate({
             id,
-            ...body,
+            valor: body.valor,
+            tipo: body.tipo,
+            descricao: body.descricao,
           })
           .catch((err) => {
-            throw new ValidationException(err.message, 400);
+            throw new ValidationException(err.message, 422);
           });
+
+        const userService = new UserService();
+        await Promise.resolve(
+          await userService.transaction({
+            id: data.id,
+            value: data.valor,
+            type: data.tipo,
+            description: data.descricao,
+          })
+        );
 
         const handleResponse: ITransactionsResponse = {
           limite: data.valor,
@@ -57,6 +78,29 @@ export const transactionsRouter = new Elysia()
 
           return {
             error: err.message,
+          };
+        }
+
+        if (err instanceof InconsistentTransactionException) {
+          set.status = err.statusCode;
+
+          return {
+            error: err.message,
+          };
+        }
+
+        if (err instanceof CustomerNotFoundException) {
+          set.status = err.statusCode;
+
+          return {
+            error: err.message,
+          };
+        }
+
+        if (err) {
+          set.status = 400;
+          return {
+            error: err,
           };
         }
       }
