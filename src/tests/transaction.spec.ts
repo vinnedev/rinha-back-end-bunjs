@@ -76,7 +76,7 @@ describe("Transaction test", () => {
     };
 
     const receiveBody = {
-      error: "Debit Transaction - Inconsistent Transaction",
+      error: "insufficient funds",
     };
 
     const response = await request(url)

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import * as yup from "yup";
-import { ETipo, ITransactions, ITransactionsResponse } from "../interfaces";
+import { ETipo, ITransactions } from "../interfaces";
 import { UserService } from "../services/user.service";
 import {
   CustomerNotFoundException,
@@ -56,22 +56,16 @@ export const transactionsRouter = new Elysia()
           });
 
         const userService = new UserService();
-        await Promise.resolve(
-          await userService.transaction({
-            id: data.id,
-            value: data.valor,
-            type: data.tipo,
-            description: data.descricao,
-          })
-        );
 
-        const handleResponse: ITransactionsResponse = {
-          limite: data.valor,
-          saldo: data.valor - 100,
-        };
+        const transaction = await userService.transaction({
+          id: data.id,
+          value: data.valor,
+          type: data.tipo,
+          description: data.descricao,
+        });
 
         set.status = 200;
-        return handleResponse;
+        return transaction;
       } catch (err) {
         if (err instanceof ValidationException) {
           set.status = err.statusCode;

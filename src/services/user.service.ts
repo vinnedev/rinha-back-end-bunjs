@@ -1,5 +1,5 @@
 import { postgres } from "../database/postgres";
-import { ETipo, ICustomers } from "../interfaces";
+import { ETipo, ICustomers, ITransactionsResponse } from "../interfaces";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
@@ -29,9 +29,7 @@ class UserService {
       customer.balance! - value < -customer.customer_limit!;
 
     if (debitTransaction && inconsistentBalance) {
-      throw new InconsistentTransactionException(
-        "Debit Transaction - Inconsistent Transaction"
-      );
+      throw new InconsistentTransactionException("insufficient funds");
     }
 
     const creditTransaction = type === "c";
@@ -39,8 +37,12 @@ class UserService {
     const newValue = creditTransaction ? value : -value;
     const newBalance = customer.balance! + newValue;
 
-    console.log("newBalance", newBalance);
-    console.log("description", description);
+    const handleTransaction: ITransactionsResponse = {
+      limite: customer.customer_limit!,
+      saldo: newBalance,
+    };
+
+    return handleTransaction;
   }
 
   async findById(id: number) {
