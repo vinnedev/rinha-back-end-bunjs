@@ -5,8 +5,6 @@
     "moduleResolution": "node",
     "types": [
       "bun-types",
-      "jest",
-      "node"
     ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
