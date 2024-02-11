@@ -44,24 +44,6 @@ class UserService {
       conn.release();
     }
   }
-
-  async updateBalance({ id, balance }: HandleUpdateBalance) {
-    const conn = await this._postgres.connect();
-
-    try {
-      await conn.query("BEGIN");
-      await conn.query("UPDATE customers SET balance = $1 WHERE id = $2;", [
-        balance,
-        id,
-      ]);
-      await conn.query("COMMIT");
-    } catch (err) {
-      await conn.query("ROLLBACK");
-      console.error("Erro durante o update:", err);
-    } finally {
-      conn.release();
-    }
-  }
 }
 
 export { UserService };

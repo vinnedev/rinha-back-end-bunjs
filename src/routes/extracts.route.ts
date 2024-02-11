@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import * as yup from "yup";
+import { TransactionService } from "../services/transaction.service";
 import { ValidationException } from "../utils/errors";
 
 interface IReceiveRequest {
@@ -29,8 +30,11 @@ export const extractsRouter = new Elysia().get(
           throw new ValidationException(err.message, 422);
         });
 
+      const transactionService = new TransactionService();
+      const extract = await transactionService.extract(data.id);
+
       set.status = 200;
-      return "";
+      return extract;
     } catch (err) {
       if (err instanceof ValidationException) {
         set.status = err.statusCode;

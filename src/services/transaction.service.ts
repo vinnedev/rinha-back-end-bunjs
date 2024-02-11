@@ -1,5 +1,5 @@
 import { postgres } from "../database/postgres";
-import { ETipo, ICustomers, ITransactionsResponse } from "../interfaces";
+import { ETipo, ITransactionsResponse } from "../interfaces";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
@@ -18,26 +18,33 @@ export type HandleCreateTransaction = {
   value: number;
   type: NonNullable<ETipo | undefined>;
   description: string;
+  balance: number;
 };
 
 class TransactionService {
-  private _userService = new UserService();
   private _postgres = postgres;
+  private _userService = new UserService();
 
   async createTransaction({
     customer_id,
     value,
     type,
     description,
+    balance,
   }: HandleCreateTransaction) {
     const conn = await this._postgres.connect();
 
     try {
       await conn.query("BEGIN");
       await conn.query(
-        "INSERT INTO transactions (customer_id, value, type, description, created_at) VALUES ($1, $2, $3, $4, $5)",
-        [customer_id, value, type, description, new Date().toISOString()]
+        "INSERT INTO transactions (customer_id, value, type, description, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)",
+        [customer_id, value, type, description]
       );
+
+      await conn.query("UPDATE customers SET balance = $1 WHERE id = $2;", [
+        balance,
+        customer_id,
+      ]);
       await conn.query("COMMIT");
     } catch (err) {
       await conn.query("ROLLBACK");
@@ -53,7 +60,7 @@ class TransactionService {
     type,
     description,
   }: HandleTransaction): Promise<ITransactionsResponse> {
-    const customer = await this.findById(id);
+    const customer = await this._userService.findById(id);
     if (!customer) {
       throw new CustomerNotFoundException(
         `customer not found - id: ${id}`,
@@ -79,9 +86,8 @@ class TransactionService {
       value,
       type,
       description,
+      balance: newBalance,
     });
-
-    this._userService.updateBalance({ id, balance: newBalance });
 
     return {
       limite: customer.customer_limit!,
@@ -89,32 +95,69 @@ class TransactionService {
     };
   }
 
-  async findById(id: number) {
-    const conn = await this._postgres.connect();
-
-    try {
-      const { rows } = await conn.query({
-        text: "SELECT * FROM customers WHERE id=$1 LIMIT 1;",
-        values: [id],
-      });
-      return rows.length > 0 ? (rows[0] as ICustomers) : null;
-    } catch (err) {
-      console.error("Erro durante a consulta:", err);
-    } finally {
-      conn.release();
-    }
+  private formatExtract(data: any) {
+    return {
+      ...data,
+      saldo: {
+        ...data.saldo,
+        data_extrato: new Date(data.saldo.data_extrato).toISOString(),
+      },
+      ultimas_transacoes: data.ultimas_transacoes.map((transacao: any) => ({
+        ...transacao,
+        realizada_em: new Date(transacao.realizada_em).toISOString(),
+      })),
+    };
   }
 
-  async findAll() {
+  async extract(customer_id: number) {
     const conn = await this._postgres.connect();
 
     try {
-      await conn.query("BEGIN");
-      const { rows } = await conn.query("SELECT * FROM customers;");
-      await conn.query("COMMIT");
-      return rows.length > 0 ? (rows as ICustomers[]) : null;
+      const { rows } = await conn.query(
+        `WITH last_transactions AS (
+        SELECT
+            t.customer_id,
+            t.value,
+            t.type,
+            t.description,
+            t.created_at
+        FROM
+            transactions t
+        WHERE
+            t.customer_id = $1
+        ORDER BY
+            t.created_at DESC
+        LIMIT 10
+      )
+      SELECT json_build_object(
+        'saldo', json_build_object(
+            'total', COALESCE(c.balance, 0),
+            'data_extrato', now(),
+            'limite', c.customer_limit
+        ),
+        'ultimas_transacoes', COALESCE(json_agg(
+            json_build_object(
+                'valor', lt.value,
+                'tipo', lt.type,
+                'descricao', lt.description,
+                'realizada_em', lt.created_at
+            ) ORDER BY lt.created_at DESC
+            ) FILTER (WHERE lt.value IS NOT NULL), '[]'::json)
+      )
+      FROM
+        customers c
+      LEFT JOIN
+        last_transactions lt ON c.id = lt.customer_id
+      WHERE
+        c.id = $1
+      GROUP BY
+        c.id;`,
+        [customer_id]
+      );
+
+      const data = rows[0].json_build_object;
+      return this.formatExtract(data);
     } catch (err) {
-      await conn.query("ROLLBACK");
       console.error("Erro durante a consulta:", err);
     } finally {
       conn.release();
