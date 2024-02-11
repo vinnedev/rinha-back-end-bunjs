@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import * as yup from "yup";
 import { ETipo, ITransactions } from "../interfaces";
-import { UserService } from "../services/user.service";
+import { TransactionService } from "../services/transaction.service";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
@@ -55,9 +55,8 @@ export const transactionsRouter = new Elysia()
             throw new ValidationException(err.message, 422);
           });
 
-        const userService = new UserService();
-
-        const transaction = await userService.transaction({
+        const transactionService = new TransactionService();
+        const transaction = await transactionService.transaction({
           id: data.id,
           value: data.valor,
           type: data.tipo,
