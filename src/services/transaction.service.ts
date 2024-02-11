@@ -47,7 +47,12 @@ class TransactionService {
     }
   }
 
-  async transaction({ id, value, type, description }: HandleTransaction) {
+  async transaction({
+    id,
+    value,
+    type,
+    description,
+  }: HandleTransaction): Promise<ITransactionsResponse> {
     const customer = await this.findById(id);
     if (!customer) {
       throw new CustomerNotFoundException(
@@ -78,12 +83,10 @@ class TransactionService {
 
     this._userService.updateBalance({ id, balance: newBalance });
 
-    const handleTransaction: ITransactionsResponse = {
+    return {
       limite: customer.customer_limit!,
       saldo: newBalance,
     };
-
-    return handleTransaction;
   }
 
   async findById(id: number) {
