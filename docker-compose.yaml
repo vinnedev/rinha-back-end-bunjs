@@ -13,8 +13,7 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: '183MB'
-    network_mode: "host"
+          memory: '183MB'    
 
   api02:
     <<: *api
@@ -29,12 +28,13 @@ services:
     depends_on:
       - api01
       - api02
-    network_mode: host
+    ports:
+      - "9999:9999" 
     deploy:    
       resources:
         limits:
           cpus: '0.5'
-          memory: '183MB'
+          memory: '183MB'     
 
   db: # pgsql
     image: postgres:16.1-alpine3.19
@@ -48,8 +48,7 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
-    command: postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf
-    network_mode: host
+    command: postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf    
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
@@ -61,3 +60,8 @@ services:
         limits:
           cpus: '0.5'
           memory: '183MB'
+
+networks:
+      default:
+        driver: bridge
+        name: rinha-nginx-2024q1            
