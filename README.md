@@ -1,6 +1,6 @@
 # Submissão para Rinha de Backend, Segunda Edição: 2024/Q1 - Controle de Concorrência
 
-<img src="https://img.freepik.com/fotos-premium/o-campeao-peso-pena-um-galo-musculoso-em-equipamento-de-boxe-pronto-para-lutar-no-ringue_899027-1090.jpg" alt="logo galo doido" width="300" height="auto">
+<img src="https://img.freepik.com/fotos-premium/o-campeao-peso-pena-um-galo-musculoso-em-equipamento-de-boxe-pronto-para-lutar-no-ringue_899027-1090.jpg" alt="logo galo doido" width="auto" height="auto">
 <br />
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Nginx_logo.svg" alt="logo nginx" width="300" height="auto">
