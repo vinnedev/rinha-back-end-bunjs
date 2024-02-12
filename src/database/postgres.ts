@@ -1,8 +1,12 @@
 import { Pool } from "pg";
 import { env } from "../utils/env";
 
+const connectionString = env.PG_HOST
+  ? env.PG_HOST
+  : `postgres://3rfx8swo:CRXjHv7qOGFFKyY@localhost:5432/rinhadebackend`;
+
 export const postgres = new Pool({
-  connectionString: `postgres://${env.PG_USER}:${env.PG_PASS}:${env.PG_PORT}/${env.PG_DB}`,
+  connectionString,
   max: 15,
   idleTimeoutMillis: 7000,
 });

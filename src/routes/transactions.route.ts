@@ -88,9 +88,13 @@ export const transactionsRouter = new Elysia().post(
 
       if (err) {
         set.status = 400;
-        return {
-          error: err,
-        };
+        return err instanceof Error
+          ? {
+              error: err.message,
+              stack: err.stack,
+              cause: err.cause,
+            }
+          : console.log(err);
       }
     }
   }

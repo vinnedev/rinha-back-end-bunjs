@@ -1,12 +1,17 @@
-version: '3.8'
+version: '3.5'
 
 services:
-  api01: &api  
+  api01: &api
+    hostname: api01
     build:
-     context: .
-     dockerfile: ./Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - PG_HOST=postgres://3rfx8swo:CRXjHv7qOGFFKyY@db:5432/rinhadebackend
     ports:
-       - "8001:8000"
+      - "3001:3000"
     depends_on:
       - db
     deploy:
@@ -19,7 +24,7 @@ services:
     <<: *api
     hostname: api02
     ports:
-       - "8002:8000"
+      - "3002:3000"
 
   nginx: # Load Balancer
     image: nginx:latest
@@ -29,7 +34,7 @@ services:
       - api01
       - api02
     ports:
-      - "9999:9999" 
+      - "9999:9999"    
     deploy:    
       resources:
         limits:
@@ -62,6 +67,6 @@ services:
           memory: '183MB'
 
 networks:
-      default:
-        driver: bridge
-        name: rinha-nginx-2024q1            
+  default:
+    driver: bridge
+    name: rinha-nginx-2024q1           
