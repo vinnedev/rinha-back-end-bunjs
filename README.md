@@ -1,15 +1,19 @@
-# Elysia with Bun runtime
+# Submissão para Rinha de Backend, Segunda Edição: 2024/Q1 - Controle de Concorrência
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
+<img src="https://img.freepik.com/fotos-premium/o-campeao-peso-pena-um-galo-musculoso-em-equipamento-de-boxe-pronto-para-lutar-no-ringue_899027-1090.jpg" alt="logo galo doido" width="300" height="auto">
+<br />
 
-## Development
-To start the development server run:
-```bash
-bun run dev
-```
+<img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Nginx_logo.svg" alt="logo nginx" width="300" height="auto">
+<br />
+<img src="https://bun.sh/logo.svg" alt="logo Bun" width="200" height="auto">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/993px-Postgresql_elephant.svg.png" alt="logo pgsql" width="200" height="auto">
 
-Open http://localhost:3000/ with your browser to see the result.
+
+## Vinicius Abreu
+Submissão feita com:
+- `nginx` como load balancer
+- `Postgres` como banco de dados
+- `BunJS` como runtime
+- `Elysia` como framework
+- [repositório da api](https://github.com/vinnedev/rinha-back-end-bunjs)
+- [@vinnedev](https://twitter.com/vinnedev) @ twitter / x
