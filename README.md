@@ -13,7 +13,8 @@ Submissão feita com:
 - [@vinnedev](https://twitter.com/vinnedev) @ twitter / x
 
 <br />
-<img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Nginx_logo.svg" alt="logo nginx" width="200" height="auto">
-<br />
-<img src="https://bun.sh/logo.svg" alt="logo Bun" width="200" height="auto">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/993px-Postgresql_elephant.svg.png" alt="logo pgsql" width="200" height="auto">
+<img src="https://upload.wikimedia.org/wikipedia/commons/c/c5/Nginx_logo.svg" alt="logo nginx" width="200" height="auto"><br />
+<img src="https://bun.sh/logo.svg" alt="logo Bun" width="200" height="auto"><br />
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/993px-Postgresql_elephant.svg.png" alt="logo pgsql" width="200" height="auto"><br />
+<img src="https://elysiajs.com/assets/elysia.svg" alt="logo elysia" width="200" height="auto"><br />
+
