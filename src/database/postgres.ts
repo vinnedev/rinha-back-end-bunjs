@@ -10,12 +10,3 @@ export const postgres = new Pool({
   max: 15,
   idleTimeoutMillis: 7000,
 });
-
-postgres.on("connect", () => {
-  console.log("postgres connected");
-});
-
-postgres.on("error", (err) => {
-  console.error(`Unhandled error: ${err}`);
-  process.exit(-1);
-});
