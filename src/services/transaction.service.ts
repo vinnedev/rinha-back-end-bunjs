@@ -25,6 +25,16 @@ class TransactionService {
   private _postgres = postgres;
   private _userService = new UserService();
 
+  private async executeQuery(query: string, params: any[] = []) {
+    const conn = await this._postgres.connect();
+    try {
+      const result = await conn.query(query, params);
+      return result.rows;
+    } finally {
+      conn.release();
+    }
+  }
+
   async createTransaction({
     customer_id,
     value,
@@ -32,25 +42,20 @@ class TransactionService {
     description,
     balance,
   }: HandleCreateTransaction) {
-    const conn = await this._postgres.connect();
+    const query = `
+      INSERT INTO transactions (customer_id, value, type, description, created_at)
+      VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`;
 
+    const updateQuery = `UPDATE customers SET balance = $1 WHERE id = $2;`;
+
+    await this.executeQuery("BEGIN");
     try {
-      await conn.query("BEGIN");
-      await conn.query(
-        "INSERT INTO transactions (customer_id, value, type, description, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)",
-        [customer_id, value, type, description]
-      );
-
-      await conn.query("UPDATE customers SET balance = $1 WHERE id = $2;", [
-        balance,
-        customer_id,
-      ]);
-      await conn.query("COMMIT");
+      await this.executeQuery(query, [customer_id, value, type, description]);
+      await this.executeQuery(updateQuery, [balance, customer_id]);
+      await this.executeQuery("COMMIT");
     } catch (err) {
-      await conn.query("ROLLBACK");
+      await this.executeQuery("ROLLBACK");
       console.error("Erro durante a inserção:", err);
-    } finally {
-      conn.release();
     }
   }
 
@@ -62,10 +67,7 @@ class TransactionService {
   }: HandleTransaction): Promise<ITransactionsResponse> {
     const customer = await this._userService.findById(id);
     if (!customer) {
-      throw new CustomerNotFoundException(
-        `customer not found - id: ${id}`,
-        404
-      );
+      throw new CustomerNotFoundException(`customer not found - id: ${id}`, 404);
     }
 
     const debitTransaction = type === "d";
@@ -77,11 +79,10 @@ class TransactionService {
     }
 
     const creditTransaction = type === "c";
-
     const newValue = creditTransaction ? value : -value;
     const newBalance = customer.balance! + newValue;
 
-    this.createTransaction({
+    await this.createTransaction({
       customer_id: id,
       value,
       type,
@@ -110,39 +111,36 @@ class TransactionService {
   }
 
   async extract(customer_id: number) {
-    const conn = await this._postgres.connect();
-
-    try {
-      const { rows } = await conn.query(
-        `WITH last_transactions AS (
+    const query = `
+      WITH last_transactions AS (
         SELECT
-            t.customer_id,
-            t.value,
-            t.type,
-            t.description,
-            t.created_at
+          t.customer_id,
+          t.value,
+          t.type,
+          t.description,
+          t.created_at
         FROM
-            transactions t
+          transactions t
         WHERE
-            t.customer_id = $1
+          t.customer_id = $1
         ORDER BY
-            t.created_at DESC
+          t.created_at DESC
         LIMIT 10
       )
       SELECT json_build_object(
         'saldo', json_build_object(
-            'total', COALESCE(c.balance, 0),
-            'data_extrato', now(),
-            'limite', c.customer_limit
+          'total', COALESCE(c.balance, 0),
+          'data_extrato', now(),
+          'limite', c.customer_limit
         ),
         'ultimas_transacoes', COALESCE(json_agg(
-            json_build_object(
-                'valor', lt.value,
-                'tipo', lt.type,
-                'descricao', lt.description,
-                'realizada_em', lt.created_at
-            ) ORDER BY lt.created_at DESC
-            ) FILTER (WHERE lt.value IS NOT NULL), '[]'::json)
+          json_build_object(
+            'valor', lt.value,
+            'tipo', lt.type,
+            'descricao', lt.description,
+            'realizada_em', lt.created_at
+          ) ORDER BY lt.created_at DESC
+        ) FILTER (WHERE lt.value IS NOT NULL), '[]'::json)
       )
       FROM
         customers c
@@ -151,16 +149,13 @@ class TransactionService {
       WHERE
         c.id = $1
       GROUP BY
-        c.id;`,
-        [customer_id]
-      );
+        c.id;`;
 
-      const data = rows[0].json_build_object;
-      return this.formatExtract(data);
+    try {
+      const [data] = await this.executeQuery(query, [customer_id]);
+      return this.formatExtract(data.json_build_object);
     } catch (err) {
       console.error("Erro durante a consulta:", err);
-    } finally {
-      conn.release();
     }
   }
 }

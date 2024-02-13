@@ -1,8 +1,7 @@
 {
   "name": "app",
   "version": "1.0.50",
-  "scripts": {
-    "test": "bun test ./src/tests/*.spec.ts",
+  "scripts": {    
     "dev": "bun run --watch src/server.ts"
   },
   "dependencies": {
@@ -17,5 +16,5 @@
     "@types/yup": "^0.32.0",
     "bun-types": "latest"
   },
-  "module": "src/index.js"
+  "module": "src/server.js"
 }

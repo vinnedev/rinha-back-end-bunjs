@@ -7,6 +7,8 @@ const connectionString = env.PG_HOST
 
 export const postgres = new Pool({
   connectionString,
-  max: 15,
-  idleTimeoutMillis: 7000,
-});
+  max: 35,
+  idleTimeoutMillis: 30000,
+})
+
+

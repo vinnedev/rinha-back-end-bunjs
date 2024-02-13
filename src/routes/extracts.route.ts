@@ -15,41 +15,23 @@ export const extractsRouter = new Elysia().get(
   async ({ params: { id }, set }: IReceiveRequest) => {
     try {
       const validationSchema = yup.object({
-        id: yup
-          .number()
-          .required("[id] is required")
-          .integer("[id] should be integer")
-          .positive("[id] should be positive"),
+        id: yup.number().required("[id] is required").integer("[id] should be integer").positive("[id] should be positive"),
       });
 
-      const data = await validationSchema
-        .validate({
-          id,
-        })
-        .catch((err) => {
-          throw new ValidationException(err.message, 422);
-        });
-
+      const { id: validatedId } = await validationSchema.validate({ id });
       const transactionService = new TransactionService();
-      const extract = await transactionService.extract(data.id);
+      const extract = await transactionService.extract(validatedId);
 
       set.status = 200;
       return extract;
     } catch (err) {
       if (err instanceof ValidationException) {
         set.status = err.statusCode;
-
-        return {
-          error: err.message,
-        };
+        return { error: err.message };
       }
 
-      if (err) {
-        set.status = 400;
-        return {
-          error: err,
-        };
-      }
+      set.status = 400;
+      return { error: err };
     }
   }
 );

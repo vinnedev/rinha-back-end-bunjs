@@ -35,7 +35,7 @@ export interface ICustomers {
   id: number;
   name: string;
   customer_limit: number;
-  balance: number | null;
+  balance: number;
 }
 
 export interface ITransactions {

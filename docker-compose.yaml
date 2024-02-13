@@ -1,6 +1,6 @@
 version: '3.5'
 
-services:
+services:  
   api01: &api
     hostname: api01
     build:
@@ -12,24 +12,19 @@ services:
       - PG_HOST=postgres://3rfx8swo:CRXjHv7qOGFFKyY@db:5432/rinhadebackend
     ports:
       - "3000"
-    depends_on:
+    depends_on:      
       - db
     deploy:
       resources:
         limits:
           cpus: '0.33'
-          memory: '150MB'    
+          memory: '125MB'    
 
   api02:
     <<: *api
     hostname: api02
     ports:
       - "3000"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.33'
-          memory: '150MB'  
 
   nginx: # Load Balancer
     image: nginx:latest
@@ -44,7 +39,7 @@ services:
       resources:
         limits:
           cpus: '0.33'
-          memory: '100MB'     
+          memory: '125MB'     
 
   db: # pgsql
     image: postgres:16.1-alpine3.19
@@ -58,18 +53,12 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
-    command: postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf    
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 10s
+    command: postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf       
     deploy:
       resources:
         limits:
           cpus: '0.51'
-          memory: '150MB'
+          memory: '175MB'
 
 networks:
   default:

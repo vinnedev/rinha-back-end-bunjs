@@ -12,5 +12,4 @@ COPY --from=install /usr/src/app/node_modules /usr/src/app/node_modules
 COPY . .
 
 USER bun
-
 ENTRYPOINT ["bun", "run", "./src/server.ts"]
