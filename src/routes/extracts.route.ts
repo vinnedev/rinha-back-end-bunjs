@@ -37,7 +37,7 @@ export const extractsRouter = new Elysia().get(
       }
 
       if (err) {
-        set.status = 400;
+        set.status = 422;
         return {
           error: err,
         };

@@ -25,8 +25,7 @@ export function validateTipo(tipo: ETipo): ETipo {
     return tipo
 }
 
-export function validateDescricao(descricao: string): string { 
-    console.log(descricao.length)
+export function validateDescricao(descricao: string): string {     
     if(!descricao) throw new ValidationException("[descricao] is required", 422);  
     if(descricao.length < 1 || descricao.length > 10) throw new ValidationException("[description] must have a minimum of 1 character and a maximum of 10", 422);  
     return descricao

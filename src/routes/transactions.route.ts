@@ -60,7 +60,7 @@ export const transactionsRouter = new Elysia().post(
       }
 
       if (err) {
-        set.status = 400;
+        set.status = 422;
         return err instanceof Error
           ? {
             error: err.message,
