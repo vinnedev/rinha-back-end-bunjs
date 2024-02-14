@@ -1,12 +1,12 @@
 import { Elysia } from "elysia";
-import * as yup from "yup";
-import { ETipo, ITransactions } from "../interfaces";
+import { ITransactions } from "../interfaces";
 import { TransactionService } from "../services/transaction.service";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
   ValidationException,
 } from "../utils/errors";
+import { validateDescricao, validateID, validateTipo, validateValor } from "../utils/validations";
 
 interface IReceiveRequest {
   body: ITransactions;
@@ -20,39 +20,12 @@ export const transactionsRouter = new Elysia().post(
   "clientes/:id/transacoes",
   async ({ body, params: { id }, set }: IReceiveRequest) => {
     try {
-      const validationSchema = yup.object({
-        id: yup
-          .number()
-          .required("[id] is required")
-          .integer("[id] should be integer")
-          .positive("[id] should be positive"),
-        valor: yup
-          .number()
-          .required("[valor] is required")
-          .integer("[valor] should be integer")
-          .positive("[valor] should be positive"),
-        tipo: yup
-          .mixed<ETipo>()
-          .oneOf(Object.values(ETipo))
-          .required("[tipo] is required")
-          .nonNullable(),
-        descricao: yup
-          .string()
-          .required("[descricao] is requred")
-          .min(1, "[description] must have at least 1 character")
-          .max(10, "[description] must have a maximum of 10 characters"),
-      });
-
-      const data = await validationSchema
-        .validate({
-          id,
-          valor: body.valor,
-          tipo: body.tipo,
-          descricao: body.descricao,
-        })
-        .catch((err) => {
-          throw new ValidationException(err.message, 422);
-        });
+      const data = {
+        id: validateID(id),
+        valor: validateValor(body.valor),
+        tipo: validateTipo(body.tipo),
+        descricao: validateDescricao(body.descricao),
+      }
 
       const transactionService = new TransactionService();
       const transaction = await transactionService.transaction({
@@ -90,10 +63,10 @@ export const transactionsRouter = new Elysia().post(
         set.status = 400;
         return err instanceof Error
           ? {
-              error: err.message,
-              stack: err.stack,
-              cause: err.cause,
-            }
+            error: err.message,
+            stack: err.stack,
+            cause: err.cause,
+          }
           : console.log(err);
       }
     }

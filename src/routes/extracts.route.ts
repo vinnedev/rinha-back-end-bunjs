@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
-import * as yup from "yup";
 import { TransactionService } from "../services/transaction.service";
 import { ValidationException } from "../utils/errors";
+import { validateID } from "../utils/validations";
 
 interface IReceiveRequest {
   params: {
@@ -14,24 +14,16 @@ export const extractsRouter = new Elysia().get(
   "/clientes/:id/extrato",
   async ({ params: { id }, set }: IReceiveRequest) => {
     try {
-      const validationSchema = yup.object({
-        id: yup
-          .number()
-          .required("[id] is required")
-          .integer("[id] should be integer")
-          .positive("[id] should be positive"),
-      });
-
-      const data = await validationSchema
-        .validate({
-          id,
-        })
-        .catch((err) => {
-          throw new ValidationException(err.message, 422);
-        });
-
+      const validatedId = validateID(id);
       const transactionService = new TransactionService();
-      const extract = await transactionService.extract(data.id);
+      const extract = await transactionService.extract(validatedId);
+
+      if (!extract) {
+        set.status = 404;
+        return {
+          error: "extract not found",
+        };
+      }
 
       set.status = 200;
       return extract;

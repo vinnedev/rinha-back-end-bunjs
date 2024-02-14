@@ -28,10 +28,12 @@ class TransactionService {
         [customer_id, value, type, description]
       );
 
-      await conn.query("UPDATE customers SET balance = $1 WHERE id = $2;", [
-        balance,
-        customer_id,
-      ]);
+      await conn.query(`
+      MERGE INTO customers AS target
+      USING (SELECT ${customer_id} AS id) AS source
+      ON target.id = source.id
+      WHEN MATCHED THEN
+      UPDATE SET balance = ${balance};`);
       await conn.query("COMMIT");
     } catch (err) {
       await conn.query("ROLLBACK");
