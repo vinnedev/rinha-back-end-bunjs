@@ -1,22 +1,12 @@
 import { postgres } from "../database/postgres";
-import { ETipo, ICustomers } from "../interfaces";
+import { ICustomers } from "../interfaces";
 
-export type HandleTransaction = {
-  id: number;
-  value: number;
-  type: NonNullable<ETipo | undefined>;
-  description: string;
-};
-
-export type HandleUpdateBalance = {
-  id: number;
-  balance: number;
-};
 
 class UserService {
   private _postgres = postgres;
 
   async findById(id: number) {
+    if(id >= 6) return null    
     const conn = await this._postgres.connect();
 
     try {

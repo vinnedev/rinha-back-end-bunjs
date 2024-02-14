@@ -1,25 +1,12 @@
 import { postgres } from "../database/postgres";
-import { ETipo, ITransactionsResponse } from "../interfaces";
+import { ETipo, HandleCreateTransaction, HandleTransaction, ITransactionsResponse } from "../interfaces";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
 } from "../utils/errors";
 import { UserService } from "./user.service";
 
-export type HandleTransaction = {
-  id: number;
-  value: number;
-  type: NonNullable<ETipo | undefined>;
-  description: string;
-};
 
-export type HandleCreateTransaction = {
-  customer_id: number;
-  value: number;
-  type: NonNullable<ETipo | undefined>;
-  description: string;
-  balance: number;
-};
 
 class TransactionService {
   private _postgres = postgres;
@@ -78,10 +65,8 @@ class TransactionService {
 
     const creditTransaction = type === "c";
 
-    const newValue = creditTransaction ? value : -value;
-    const newBalance = customer.balance! + newValue;
-
-    this.createTransaction({
+    const newBalance = creditTransaction ? customer.balance! + value : customer.balance! - value;
+    await this.createTransaction({
       customer_id: id,
       value,
       type,
@@ -155,8 +140,7 @@ class TransactionService {
         [customer_id]
       );
 
-      const data = rows[0].json_build_object;
-      return this.formatExtract(data);
+      return rows.length > 0 ? this.formatExtract(rows[0]?.json_build_object) : null;
     } catch (err) {
       console.error("Erro durante a consulta:", err);
     } finally {

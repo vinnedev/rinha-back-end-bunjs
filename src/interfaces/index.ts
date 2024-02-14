@@ -30,6 +30,27 @@ export interface IExtractReponse {
   ];
 }
 
+export type HandleTransaction = {
+  id: number;
+  value: number;
+  type: NonNullable<ETipo | undefined>;
+  description: string;
+};
+
+export type HandleCreateTransaction = {
+  customer_id: number;
+  value: number;
+  type: NonNullable<ETipo | undefined>;
+  description: string;
+  balance: number;
+};
+
+export type HandleUpdateBalance = {
+  id: number;
+  balance: number;
+};
+
+
 // Database Tables
 export interface ICustomers {
   id: number;
