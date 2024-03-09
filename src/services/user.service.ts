@@ -27,7 +27,7 @@ class UserService {
 
     try {
       const { rows } = await conn.query("SELECT id, customer_limit, balance FROM customers;");
-      return rows.length > 0 ? (rows as ICustomers[]) : null;
+      return rows as ICustomers[];
     } catch (err) {
       console.error("Erro durante a consulta:", err);
     } finally {

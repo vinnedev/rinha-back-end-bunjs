@@ -23,6 +23,7 @@ class TransactionService {
 
     try {
       await conn.query("BEGIN");
+      await conn.query("SELECT pg_advisory_xact_lock($1)", [customer_id]);
       await conn.query(
         "INSERT INTO transactions (customer_id, value, type, description, created_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)",
         [customer_id, value, type, description]
