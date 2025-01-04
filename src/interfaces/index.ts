@@ -39,6 +39,7 @@ export type HandleTransaction = {
 
 export type HandleCreateTransaction = {
   customer_id: number;
+  version: number;
   value: number;
   type: NonNullable<ETipo | undefined>;
   description: string;
@@ -57,6 +58,7 @@ export interface ICustomers {
   name: string;
   customer_limit: number;
   balance: number | null;
+  version: number;
 }
 
 export interface ITransactions {

@@ -4,6 +4,7 @@ CREATE TABLE customers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     customer_limit INT NOT NULL,
+    version INT NOT NULL DEFAULT 0,
     balance INT
 );
 

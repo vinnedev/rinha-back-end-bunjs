@@ -1,5 +1,5 @@
 import { postgres } from "../database/postgres";
-import { ETipo, HandleCreateTransaction, HandleTransaction, ITransactionsResponse } from "../interfaces";
+import { HandleCreateTransaction, HandleTransaction, ITransactionsResponse } from "../interfaces";
 import {
   CustomerNotFoundException,
   InconsistentTransactionException,
@@ -14,6 +14,7 @@ class TransactionService {
 
   async createTransaction({
     customer_id,
+    version,
     value,
     type,
     description,
@@ -29,12 +30,7 @@ class TransactionService {
         [customer_id, value, type, description]
       );
 
-      await conn.query(`
-      MERGE INTO customers AS target
-      USING (SELECT ${customer_id} AS id) AS source
-      ON target.id = source.id
-      WHEN MATCHED THEN
-      UPDATE SET balance = ${balance};`);
+      await conn.query('UPDATE customers SET balance = $1, version = version + 1 WHERE version = $2 and id = $3', [balance, version, customer_id]);
       await conn.query("COMMIT");
     } catch (err) {
       await conn.query("ROLLBACK");
@@ -71,6 +67,7 @@ class TransactionService {
     const newBalance = creditTransaction ? customer.balance! + value : customer.balance! - value;
     await this.createTransaction({
       customer_id: id,
+      version: customer.version,
       value,
       type,
       description,
